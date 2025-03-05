@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Catalog.API.Data;
+using Catalog.API.Repositories.Implementation;
 using Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -14,7 +16,7 @@ namespace Catalog.UnitTests
             _dbContext = contextGenerator.Generate();
         }
         [Fact]
-        public void CanGetAllPlates()
+        public async void CanGetAllPlates()
         {
             _dbContext.Plates.AddRange(
                  new Plate
@@ -34,14 +36,14 @@ namespace Catalog.UnitTests
                      Numbers = 66,
                      Letters = "VEY" });
 
-            var repository = new PlatesRepository(_context);
+            var repository = new PlatesRepository(_dbContext);
 
-            repository.Get();
+            var response = await repository.Get();
 
-            Assert.NotNull(repository);
-            Assert.True(repository.count() == 2);
-            Assert.True(repository.Any(x => x.Registration == "P777PER"));
-            Assert.True(repository.Any(x => x.Registration == "M66VEY"));         
+            Assert.NotNull(response);
+            Assert.True(response.Count() == 2);
+            Assert.Contains(response, x => x.Registration == "P777PER");
+            Assert.Contains(response, x => x.Registration == "M66VEY");         
         }
     }
 }
